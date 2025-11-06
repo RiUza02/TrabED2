@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iostream>
+#include <cctype>
 
 /*
 ===========================================================
@@ -45,7 +46,6 @@ static inline std::vector<std::string> dividirLinhaCSV(const std::string &linha)
 
         if (c == '"')
         {
-            // Trata aspas duplas ("") dentro de um campo
             if (dentroDeAspas && i + 1 < linha.size() && linha[i + 1] == '"')
             {
                 campoAtual.push_back('"');
@@ -91,6 +91,34 @@ static inline std::string removerEspacos(const std::string &texto)
 
 /*
 ===========================================================
+  Função auxiliar: ehNumero
+  Objetivo: Verificar se uma string contém apenas dígitos.
+             Permite ponto (.) apenas no campo da pontuação.
+===========================================================
+*/
+static inline bool ehNumero(const std::string &texto, bool permitirDecimal = false)
+{
+    bool temPonto = false;
+
+    for (char c : texto)
+    {
+        if (std::isdigit(static_cast<unsigned char>(c)))
+            continue;
+
+        if (permitirDecimal && c == '.' && !temPonto)
+        {
+            temPonto = true;
+            continue;
+        }
+
+        return false;
+    }
+
+    return !texto.empty();
+}
+
+/*
+===========================================================
   Função: lerCSVRecomendacoes
   Objetivo:
     Ler um arquivo CSV contendo exatamente quatro colunas:
@@ -101,11 +129,13 @@ static inline std::string removerEspacos(const std::string &texto)
 
   Detalhes:
     - Linhas com mais ou menos que 4 campos são ignoradas.
+    - Linhas com campos não numéricos são ignoradas.
     - Pode pular o cabeçalho, se especificado.
-    - Retorna um vetor com todas as recomendações válidas.
 ===========================================================
 */
-static inline std::vector<Recomendacao> lerCSVRecomendacoes(const std::string &caminhoArquivo, bool possuiCabecalho = true)
+static inline std::vector<Recomendacao> lerCSVRecomendacoes(
+    const std::string &caminhoArquivo,
+    bool possuiCabecalho = true)
 {
     std::vector<Recomendacao> recomendacoes;
     std::ifstream arquivo(caminhoArquivo);
@@ -118,19 +148,16 @@ static inline std::vector<Recomendacao> lerCSVRecomendacoes(const std::string &c
 
     std::string linha;
 
-    // Ignora a primeira linha se for cabeçalho
     if (possuiCabecalho)
         std::getline(arquivo, linha);
 
     while (std::getline(arquivo, linha))
     {
-        // Remove '\r' de arquivos Windows
         if (!linha.empty() && linha.back() == '\r')
             linha.pop_back();
 
         auto campos = dividirLinhaCSV(linha);
 
-        // Ignora linhas com número incorreto de campos
         if (campos.size() != 4)
             continue;
 
@@ -139,6 +166,15 @@ static inline std::vector<Recomendacao> lerCSVRecomendacoes(const std::string &c
         rec.idAplicativo = removerEspacos(campos[1]);
         rec.idAutor = removerEspacos(campos[2]);
         rec.pontuacao = removerEspacos(campos[3]);
+
+        // Ignora se algum campo não for numérico
+        if (!ehNumero(rec.idRecomendacao) ||
+            !ehNumero(rec.idAplicativo) ||
+            !ehNumero(rec.idAutor) ||
+            !ehNumero(rec.pontuacao, true))
+        {
+            continue;
+        }
 
         recomendacoes.push_back(rec);
     }

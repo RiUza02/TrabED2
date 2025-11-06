@@ -20,19 +20,16 @@ int main()
     }
 
     std::cout << "Leitura concluida com sucesso!" << std::endl;
-    std::cout << "Total de registros: " << recomendacoes.size() << std::endl << std::endl;
+    std::cout << "Total de registros: " << recomendacoes.size() << std::endl
+              << std::endl;
 
     // Exibe as 5 primeiras linhas
-    size_t limite = std::min<size_t>(5, recomendacoes.size());
-    for (size_t i = 0; i < limite; ++i)
+    HashTable tabela(1000); // Tamanho da tabela hash
+    for (int i = 0; i < 100; ++i)
     {
-        const auto &r = recomendacoes[i];
-        std::cout << "ID Recomendacao: " << r.idRecomendacao
-                  << " | AppID: " << r.idAplicativo
-                  << " | Autor: " << r.idAutor
-                  << " | Pontuacao: " << r.pontuacao
-                  << std::endl;
+        int chave = stoi(recomendacoes[i].idAplicativo);
+        tabela.add(chave);
     }
-
+    tabela.display();
     return 0;
 }

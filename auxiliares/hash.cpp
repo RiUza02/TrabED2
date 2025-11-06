@@ -1,41 +1,94 @@
-#include "hash.h"
+#pragma once
+#include <iostream>
+#include <vector>
+using namespace std;
 
-// Construtor
-HashTable::HashTable(int s) : size(s), table(s) {}
+/*
+===========================================================
+  Classe: HashTable
+  Objetivo: Implementar uma tabela hash com endereçamento
+            aberto utilizando sondagem dupla (double hashing).
 
-// Função hash
-int HashTable::funcaoHash(int key)
+  Descrição geral:
+  - Cada posição da tabela armazena uma única chave inteira.
+  - Colisões são resolvidas através da sondagem dupla:
+      índice = (h1(key) + i * h2(key)) % size
+  - h1(key) = key % size
+  - h2(key) = 1 + (key % (size - 1))
+  - Uma posição vazia é marcada com o valor EMPTY (-1).
+===========================================================
+*/
+class HashTable
 {
-    return key % size;
-}
+private:
+    vector<int> table;
+    vector<bool> ocupado;
+    int size;
+    const int EMPTY = -1;
 
-// Inserção de uma chave
-void HashTable::add(int key)
-{
-    int index = funcaoHash(key);
-    table[index].push_back(key);
-}
+    int hash1(int key) { return key % size; }
+    int hash2(int key) { return 1 + (key % (size - 1)); }
 
-// Busca de uma chave
-bool HashTable::busca(int key)
-{
-    int index = funcaoHash(key);
-    for (int val : table[index])
+public:
+    // construtor que inicializa a tabela hash com tamanho 's'
+    HashTable(int s) : size(s)
     {
-        if (val == key)
-            return true;
+        table.resize(size, EMPTY);
+        ocupado.resize(size, false);
     }
-    return false;
-}
 
-// Exibição da tabela hash
-void HashTable::display()
-{
-    for (int i = 0; i < size; i++)
+    // adiciona uma chave à tabela hash
+    void add(int key)
     {
-        cout << i << ": ";
-        for (int val : table[i])
-            cout << val << " -> ";
-        cout << "NULL" << endl;
+        int index = hash1(key);
+        int step = hash2(key);
+        int i = 0;
+        while (ocupado[(index + i * step) % size])
+        {
+            i++;
+            if (i == size)
+            {
+                cout << "Erro: tabela cheia, nao foi possivel inserir " << key << endl;
+                return;
+            }
+        }
+        int pos = (index + i * step) % size;
+        table[pos] = key;
+        ocupado[pos] = true;
     }
-}
+
+    // busca uma chave na tabela hash
+    bool busca(int key)
+    {
+        int index = hash1(key);
+        int step = hash2(key);
+        int i = 0;
+        while (ocupado[(index + i * step) % size])
+        {
+            int pos = (index + i * step) % size;
+            if (table[pos] == key)
+                return true;
+            i++;
+            if (i == size)
+                break;
+        }
+        return false;
+    }
+
+    // exibe o conteúdo da tabela hash
+    void display()
+    {
+        cout << "==============================" << endl;
+        cout << "   TABELA HASH (Sondagem Dupla)" << endl;
+        cout << "==============================" << endl;
+        for (int i = 0; i < size; i++)
+        {
+            cout << i + 1 << " --> ";
+            if (ocupado[i])
+                cout << table[i];
+            else
+                cout << "NULL";
+            cout << endl;
+        }
+    }
+};
