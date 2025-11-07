@@ -1,13 +1,12 @@
 #ifndef LEITURA_H
 #define LEITURA_H
 
-#include <string>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <iostream>
-#include <cctype>
+#pragma once
+#include <string>    // Manipulação de strings
+#include <vector>    // Manipulação de vetores
+#include <fstream>   // Leitura de arquivo
+#include <iostream>  // prints de erros
+#include <cctype>    // Verificação de caracteres
 
 /*
 ===========================================================

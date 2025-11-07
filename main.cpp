@@ -23,9 +23,8 @@ int main()
     std::cout << "Total de registros: " << recomendacoes.size() << std::endl
               << std::endl;
 
-    // Exibe as 5 primeiras linhas
-    HashTable tabela(1000); // Tamanho da tabela hash
-    for (int i = 0; i < 100; ++i)
+    HashTable tabela(300); // Tamanho da tabela hash
+    for (int i = 0; i < 250; ++i)  //quantidade de elementos a inserir
     {
         int chave = stoi(recomendacoes[i].idAplicativo);
         tabela.add(chave);
