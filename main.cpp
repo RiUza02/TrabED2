@@ -2,6 +2,7 @@
 #include "auxiliares/hash1.cpp"  // contém a tabela Hash1
 #include "auxiliares/hash2.cpp"  // contém a tabela Hash2
 #include "auxiliares/leitura.h" // contém funções de leitura de CSV
+#include "GameReview.cpp"
 
 using namespace std;
 
@@ -35,5 +36,67 @@ int main()
     tabela1.display();
     std::cout << std::endl << std::endl << std::endl;
     tabela2.display();
+
+    
+    // Menu interativo
+    int opcao;
+    do
+    {
+        cout << "\n============================================" << endl;
+        cout << "           MENU PRINCIPAL" << endl;
+        cout << "============================================" << endl;
+        cout << "1 - Gerar tabela hash" << endl;
+        cout << "2 - Exibir X jogos mais avaliados" << endl;
+        cout << "3 - Sair" << endl;
+        cout << "============================================" << endl;
+        cout << "Escolha uma opcao: ";
+        cin >> opcao;
+        if(opcao < 1 || opcao > 3){
+            cout << "Opcao invalida!" << endl;
+            cin >> opcao;
+        }
+        cout << endl;
+        
+        switch (opcao)
+        {
+            case 1:
+            {
+                cout << ">>> Opcao 1: Gerar tabela hash" << endl;
+                int chave;
+                cout << "Digite a chave para gerar a tabela hash: ";
+                cin >> chave;
+                // Aqui você pode chamar a função para gerar a tabela hash com a chave fornecida 
+                // RegistroHash* createTable(int n):
+                break;
+            }
+            
+            case 2:
+            {
+                cout << ">>> Opcao 2: Exibir X jogos mais avaliados" << endl;
+                 int indice;
+                cout << "Digite o indice de acesso no registro do arquivo: ";
+                cin >> indice;
+                getReview(indice);
+                break;
+            }
+            
+            case 3:
+            {
+                cout << ">>> Encerrando programa..." << endl;
+                cout << "Ate logo!" << endl;
+                break;
+            }
+            
+            default:
+            {
+                cout << ">>> Opcao invalida! Tente novamente." << endl;
+                break;
+            }
+        }
+        
+    } while (opcao != 3);
+    
+
+
     return 0;
 }
