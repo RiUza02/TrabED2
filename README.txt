@@ -1,11 +1,6 @@
 \
     HashingTrab - Projeto de Hashing em C++
 
-    Conteudo:
-    - main.cpp         : implementacao da tabela hash com menu interativo
-    - Makefile         : comandos basicos (Windows)
-    - .vscode/         : configuracoes do VS Code (tasks e launch)
-
     Como usar:
     1) Abra a pasta HashingTrab no VS Code.
     2) Compile com Ctrl+Shift+B (task "Compilar C++ (g++)").
