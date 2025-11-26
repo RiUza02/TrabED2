@@ -47,14 +47,14 @@ int main()
     int opcao;
     do
     {
-        cout << "\n============================================" << endl;
+        cout << "\n_____________________________________________" << endl;
         cout << "           MENU PRINCIPAL" << endl;
-        cout << "============================================" << endl;
+        cout << "_______________________________________________" << endl;
         cout << "1 - Gerar tabela hash" << endl;
         cout << "2 - Exibir X jogos mais avaliados" << endl;
         cout << "3 - Sair" << endl;
         cout << "4 - Opcao extra para testes" << endl;
-        cout << "============================================" << endl;
+        cout << "________________________________________________" << endl;
         cout << "Escolha uma opcao: ";
         cin >> opcao;
         if(opcao < 1 || opcao > 4){
@@ -67,7 +67,7 @@ int main()
         {
             case 1:
             {
-                cout << ">>> Opcao 1: Gerar tabela hash" << endl;
+                cout << ">>>> Opcao 1: Gerar tabela hash" << endl;
                 int chave;
                 cout << "Digite a chave para gerar a tabela hash: ";
                 cin >> chave;
@@ -78,19 +78,20 @@ int main()
             
             case 2:
             {
+                cout << ">>>> Opcao 2: Exibir X jogos mais avaliados" << endl;
                 // Pega a tabela gerada na Opção 1, ordena e exibe.
                 break;
             }
             
             case 3:
             {
-                cout << ">>> Encerrando programa" << endl;
+                cout << ">>>> Encerrando programa" << endl;
                 break;
             }
             
             case 4:
             {
-                cout << ">>> Opcao extra: Testar getReview" << endl;
+                cout << ">>>> Opcao extra: Testar getReview" << endl;
                 GameReview review;
                 int index;
                 cout << "Digite o indice do registro a ser exibido: ";
@@ -106,7 +107,7 @@ int main()
             
             default:
             {
-                cout << ">>> Opcao invalida! Tente novamente." << endl;
+                cout << ">>>> Opcao invalida! Tente novamente." << endl;
                 break;
             }
         }

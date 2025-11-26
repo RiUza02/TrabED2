@@ -25,6 +25,8 @@ private:
     string author_steamid;
     float weighted_vote_score;
 
+    int countRecords();
+
 public:
     // Construtor
     GameReview();
@@ -46,7 +48,7 @@ public:
     static bool getReview(int index, GameReview& review);
 
     // Método auxiliar para preencher os dados (necessário para o print funcionar após ler do binário)
-    bool parseFromCSVLine(const string& line);
+    bool analisalinhaCSV(const string& line);
 
     // Importa N reviews aleatórias do arquivo binário
     GameReview* import(int n);

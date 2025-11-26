@@ -10,12 +10,12 @@ GameReview::GameReview() :
     recommendationid(""), appid(0), author_steamid(""), weighted_vote_score(0.0f) {}
 
 void GameReview::print() const {
-    cout << "----------------------------------------" << endl;
+    cout << "________________________________________" << endl;
     cout << "Registro ID   : " << recommendationid << endl;
     cout << "App ID (Jogo) : " << appid << endl;
     cout << "Autor SteamID : " << author_steamid << endl;
     cout << "Nota          : " << weighted_vote_score << endl;
-    cout << "----------------------------------------" << endl;
+    cout << "__________________________________________" << endl;
 }
 
 void GameReview::createBinary(const std::string &path){
@@ -53,92 +53,149 @@ void GameReview::createBinary(const std::string &path){
     cout << "Arquivo binário criado com sucesso em: " << binPath << endl;
 }
 
-// Auxiliar para separar a string e preencher a classe
-bool GameReview::parseFromCSVLine(const string& line) {
-    vector<string> tokens = dividirLinhaCSV(line);
+// Analisa uma linha CSV e preenche os campos do objeto GameReview
+bool GameReview::analisalinhaCSV(const string& line) {
     
-    if (tokens.size() < 4) {
-        return false;
-    }
-    
-    recommendationid = tokens[0];
-    
+    // vai até o fim do recommendationid
+    size_t pos1 = line.find(',');
+    if (pos1 == string::npos) return false; // Se não achar vírgula, erro
+
+    // fim do appid
+    size_t pos2 = line.find(',', pos1 + 1);
+    if (pos2 == string::npos) return false;
+
+    // fim do author_steamid
+    size_t pos3 = line.find(',', pos2 + 1);
+    if (pos3 == string::npos) return false;
+
+    // extraindo os dados do início até a primeira vírgula
+    recommendationid = line.substr(0, pos1);
+
+    // extraindo os dados da primeira até a segunda vírgula
+    string appid_str = line.substr(pos1 + 1, pos2 - pos1 - 1);
     try {
-        appid = stoi(tokens[1]);
-    } catch (...) {
-        appid = 0;
-    }
-    
-    author_steamid = tokens[2];
-    
+        appid = stoi(appid_str);
+    } catch (...) { appid = 0; }
+
+    // extraindo os dados do segunda até a terceira vírgula
+    author_steamid = line.substr(pos2 + 1, pos3 - pos2 - 1);
+
+    // extraindo os dados do terceira virgula até o fim da linha
+    string score_str = line.substr(pos3 + 1);
     try {
-        weighted_vote_score = stof(tokens[3]);
-    } catch (...) {
-        weighted_vote_score = 0.0f;
-    }
-    
+        weighted_vote_score = stof(score_str);
+    } catch (...) { weighted_vote_score = 0.0f; } //transforma pra float
+
     return true;
 }
 
+// Função auxiliar para contar quantos registros existem no arquivo para validação de índice
+int GameReview::countRecords() {
+    string binPath = "public/reviews.bin";
+    ifstream binFile(binPath, ios::binary);
+    if (!binFile.is_open()) {
+        return -1; // indica erro ao abrir o arquivo
+    }
+
+    int total = 0;
+    uint32_t size = 0;
+
+    // conta os registros pulando o conteúdo
+    while (binFile.read(reinterpret_cast<char*>(&size), sizeof(size))) {
+        // valida o tamanho para evitar loop infinito em arquivos corrompidos
+        if (size == 0 || size > 1000000) {
+            break;
+        }
+        
+        // Pula o conteúdo do registro
+        binFile.seekg(size, ios::cur);
+        if (binFile.fail()) {
+            break;
+        }
+        
+        total++;
+    }
+
+    binFile.close();
+    return total;
+}
 
 bool GameReview::getReview(int index, GameReview& review) {
-    const string binPath = "public/reviews.bin";
-    ifstream binFile(binPath, ios::binary);
-
-    if (!binFile.is_open()) {
-        cout << "ERRO: Arquivo binario nao encontrado!" << endl;
-        cout<< "Caminho: " << binPath << endl;
-        cout << "Execute a opcao 'Gerar arquivo binario' primeiro." << endl;
-        return false;
-    }
-
+// validações do índice antes de abrir o arquivo:
     if (index < 0) {
-        cout << "ERRO: Indice invalido (deve ser >= 0)." << endl;
-        binFile.close();
+        cout << "Erro: indice inválido" << endl;
+        return false;
+    }
+    //pra contar quantos registros existem no arquivo e verificar se o índice existe
+    int totalRegistros = countRecords();
+    
+    if (totalRegistros == -1) {
+        cout << "Erro: arquivo reviews.bin nao encontrado" << endl;
+        return false;
+    }
+    
+    if (totalRegistros == 0) {
+        cout << "Erro: arquivo binário está vazio" << endl;
+        return false;
+    }
+    
+    // Verifica se o índice existe
+    if (index >= totalRegistros) {
+        cout << "Erro: indice " << index << " não existe! ";
+        cout << "O arquivo possui apenas " << totalRegistros << " registros ";
+        cout << "(índices válidos: 0 a " << (totalRegistros - 1) << ")." << endl;
+        return false;
+    }
+// fim da validação do índice
+
+    // abre o arquivo binário para buscar o registro
+    string binPath = "public/reviews.bin";
+    ifstream binFile(binPath, ios::binary);
+    if (!binFile.is_open()) {
+        cout << "Erro: Arquivo " << binPath << " nao encontrado!" << endl;
         return false;
     }
 
-    int currentIndex = 0;
-    
-    while (binFile.good() && binFile.peek() != EOF) {
-        uint32_t size;
-        
-        // Lê o tamanho
-        binFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-        
-        if (binFile.fail()) {
-            break;
-        }
-        
+    int contador = 0;
+    uint32_t size = 0;
 
-        // Lê o conteúdo
-        vector<char> buffer(size + 1);
-        binFile.read(buffer.data(), size);
-        buffer[size] = '\0';
-        
-        if (binFile.fail()) {
+    // percorre os registros até encontrar o índice
+    while (binFile.read(reinterpret_cast<char*>(&size), sizeof(size))) {
+        // verifica se o tamanho é válido
+        if (size == 0 || size > 1000000) { 
+            cout << "Erro: Tamanho de registro inválido detectado!" << endl;
             break;
         }
-        
-        // Verifica se encontrou o índice desejado
-        if (currentIndex == index) {
-            string line(buffer.data());
-            bool success = review.parseFromCSVLine(line);
-            binFile.close();
-            
-            if (success) {
-                return true;
+
+        if (contador == index) {
+            vector<char> buffer(size);
+            // tenta ler o conteúdo
+            if (binFile.read(buffer.data(), size)) {
+                string linhaLida(buffer.begin(), buffer.end());
+                bool sucesso = review.analisalinhaCSV(linhaLida);
+                binFile.close();
+                return sucesso;
             } else {
-                cerr << "ERRO: Falha ao processar o registro." << endl;
-                return false;
+                cout << "Erro ao ler dados do registro " << index << endl;
+                break;
+            }
+        } else {
+            // passo pro próximo registro
+            binFile.seekg(size, ios::cur);
+            if (binFile.fail()) {
+                cout << "Erro ao navegar pelo arquivo binário!" << endl;
+                break;
             }
         }
         
-        currentIndex++;
+        contador++;
+        
+        // verifica se já passou do índice desejado
+        if (contador > index) {
+            break;
+        }
     }
 
-    cout << "ERRO: Registro com indice " << index << " nao encontrado." << endl;
-    cout << "Total de registros disponiveis: " << currentIndex << endl;
     binFile.close();
     return false;
 }
