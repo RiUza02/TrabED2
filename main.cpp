@@ -11,6 +11,8 @@ int main()
     // Caminho do arquivo CSV
     std::string caminho = "public/reviews.csv";
 
+    GameReview gameManager;
+
     // Lê todas a lista de recomendações do arquivo
     auto recomendacoes = lerCSVRecomendacoes(caminho, true);
 
@@ -20,6 +22,9 @@ int main()
         std::cout << "Nenhum dado foi lido." << std::endl;
         return 1;
     }
+
+    std::cout << "Gerando arquivo binario..." << endl;
+    gameManager.createBinary(caminho);
 
     std::cout << "Leitura concluida com sucesso!" << std::endl;
     std::cout << "Total de registros: " << recomendacoes.size() << std::endl
@@ -48,10 +53,11 @@ int main()
         cout << "1 - Gerar tabela hash" << endl;
         cout << "2 - Exibir X jogos mais avaliados" << endl;
         cout << "3 - Sair" << endl;
+        cout << "4 - Opcao extra para testes" << endl;
         cout << "============================================" << endl;
         cout << "Escolha uma opcao: ";
         cin >> opcao;
-        if(opcao < 1 || opcao > 3){
+        if(opcao < 1 || opcao > 4){
             cout << "Opcao invalida!" << endl;
             cin >> opcao;
         }
@@ -72,18 +78,29 @@ int main()
             
             case 2:
             {
-                cout << ">>> Opcao 2: Exibir X jogos mais avaliados" << endl;
-                 int indice;
-                cout << "Digite o indice de acesso no registro do arquivo: ";
-                cin >> indice;
-                getReview(indice);
+                // Pega a tabela gerada na Opção 1, ordena e exibe.
                 break;
             }
             
             case 3:
             {
-                cout << ">>> Encerrando programa..." << endl;
-                cout << "Ate logo!" << endl;
+                cout << ">>> Encerrando programa" << endl;
+                break;
+            }
+            
+            case 4:
+            {
+                cout << ">>> Opcao extra: Testar getReview" << endl;
+                GameReview review;
+                int index;
+                cout << "Digite o indice do registro a ser exibido: ";
+                cin >> index;
+               if (GameReview::getReview(index, review)) {
+                    review.print();
+                } else {
+                    cout << "Verifique se o indice é valido e tente novamente." << endl;
+                }
+                
                 break;
             }
             

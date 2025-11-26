@@ -29,13 +29,26 @@ public:
     // Construtor
     GameReview();
 
+    // Gets
+    string getRecommendationId() const { return recommendationid; }
+    int getAppId() const { return appid; }
+    string getAuthorSteamId() const { return author_steamid; }
+    float getWeightedVoteScore() const { return weighted_vote_score; }
+    
+    
     // Imprime os campos da avaliação
-    void print() const;
+    void print()const;
 
     // Gera o arquivo binário correspondente ao arquivo CSV
     void createBinary(const std::string &path);
 
     // Acessa e imprime o i-ésimo registro do arquivo binário
-    void getReview(int i);
+    static bool getReview(int index, GameReview& review);
+
+    // Método auxiliar para preencher os dados (necessário para o print funcionar após ler do binário)
+    bool parseFromCSVLine(const string& line);
+
+    // Importa N reviews aleatórias do arquivo binário
+    GameReview* import(int n);
 };
 #endif // GAMEREVIEW_H

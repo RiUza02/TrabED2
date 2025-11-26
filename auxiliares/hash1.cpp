@@ -10,7 +10,7 @@ using namespace std;
   - Colisões são resolvidas através da sondagem dupla:
       índice = (h1(key) + i * h2(key)) % size
   - h1(key) = key % size
-  - h2(key) deve ser coprimo com size para explorar toda tabela
+  - h2(key) deve ser coprimo com size para explorar toda tabelaa
   - Uma posição vazia é marcada com o valor EMPTY (-1).
   - Chaves duplicadas NÃO são inseridas novamente.
 ===========================================================
