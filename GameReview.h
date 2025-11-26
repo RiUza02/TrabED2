@@ -1,9 +1,9 @@
 #ifndef GAMEREVIEW_H
 #define GAMEREVIEW_H
 
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -17,40 +17,39 @@ _____________________________________________________________
             - weighted_vote_score
 _____________________________________________________________
 */
-class GameReview
-{
+class GameReview {
 private:
-    string recommendationid;
-    int appid;
-    string author_steamid;
-    float weighted_vote_score;
+  string recommendationid;
+  int appid;
+  string author_steamid;
+  float weighted_vote_score;
 
-    int countRecords();
+  int countRecords();
 
 public:
-    // Construtor
-    GameReview();
+  // Construtor
+  GameReview();
 
-    // Gets
-    string getRecommendationId() const { return recommendationid; }
-    int getAppId() const { return appid; }
-    string getAuthorSteamId() const { return author_steamid; }
-    float getWeightedVoteScore() const { return weighted_vote_score; }
-    
-    
-    // Imprime os campos da avaliação
-    void print()const;
+  // Gets
+  string getRecommendationId() const { return recommendationid; }
+  int getAppId() const { return appid; }
+  string getAuthorSteamId() const { return author_steamid; }
+  float getWeightedVoteScore() const { return weighted_vote_score; }
 
-    // Gera o arquivo binário correspondente ao arquivo CSV
-    void createBinary(const std::string &path);
+  // Imprime os campos da avaliação
+  void print() const;
 
-    // Acessa e imprime o i-ésimo registro do arquivo binário
-    static bool getReview(int index, GameReview& review);
+  // Gera o arquivo binário correspondente ao arquivo CSV
+  void createBinary(const std::string &path);
 
-    // Método auxiliar para preencher os dados (necessário para o print funcionar após ler do binário)
-    bool analisalinhaCSV(const string& line);
+  // Acessa e imprime o i-ésimo registro do arquivo binário
+  static bool getReview(int index, GameReview &review);
 
-    // Importa N reviews aleatórias do arquivo binário
-    GameReview* import(int n);
+  // Método auxiliar para preencher os dados (necessário para o print funcionar
+  // após ler do binário)
+  bool analisalinhaCSV(const string &line);
+
+  // Importa N reviews aleatórias do arquivo binário
+  static GameReview *import(int n, const string &caminho);
 };
 #endif // GAMEREVIEW_H
