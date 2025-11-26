@@ -29,6 +29,12 @@ public:
     // Construtor
     GameReview();
 
+    // Imprime os campos da avaliação
+    void print() const;
+
+    // Gera o arquivo binário correspondente ao arquivo CSV
+    void createBinary(const std::string &path);
+
     // Acessa e imprime o i-ésimo registro do arquivo binário
     void getReview(int i);
 };
