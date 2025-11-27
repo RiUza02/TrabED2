@@ -1,5 +1,5 @@
 #include "GameReview.h"
-#include "auxiliares/leitura.h"
+// #include "auxiliares/leitura.h"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -216,49 +216,77 @@ bool GameReview::getReview(int index, GameReview &review) {
   return false;
 }
 
+#include <algorithm> // for sort, shuffle
+#include <fstream>
+#include <iostream>
+#include <numeric> // for iota
+#include <random>  // for default_random_engine
+#include <vector>
+
 GameReview *GameReview::import(int n, const string &caminho) {
-  cout << "DEBUG comecou\n";
-
-  ifstream binFile(caminho, ios::binary); // abrir arquivo binario
-  cout << "DEBUG abriu\n";
-
-  if (!binFile) { // se não abrir
+  ifstream binFile(caminho, ios::binary);
+  if (!binFile) {
     cerr << "Erro ao abrir arquivo binário." << endl;
     return nullptr;
   }
 
-  // definindo tamanho
-  binFile.seekg(0, ios::end);
-  double tam = binFile.tellg();
-  int registros = tam / sizeof(GameReview);
-  binFile.seekg(0, ios::beg);
-  cout << "DEBUG calculou o tamanho\n";
-
-  if (n > registros) {
-    cerr << "Foram solicitados " << n << " registros mas constam apenas "
-         << registros << " no arquivo." << endl;
+  int total = GameReview::countRecords();
+  if (total <= 0 || n > total) {
+    cerr << "Erro: Quantidade solicitada (" << n
+         << ") inválida ou maior que o total (" << total << ")." << endl;
     return nullptr;
   }
 
-  GameReview *reviews = new GameReview[n]; // armazena os registros
-  cout << "DEBUG criou vetor\n";
-  // Gerar índices aleatórios únicos
-  vector<int> indices(registros);
-  iota(indices.begin(), indices.end(), 0);
-  shuffle(indices.begin(), indices.end(), default_random_engine(time(nullptr)));
+  // gera indices aleatorios
+  vector<int> allIndices(total);
+  iota(allIndices.begin(), allIndices.end(), 0);
+  shuffle(allIndices.begin(), allIndices.end(),
+          default_random_engine(time(nullptr)));
 
-  cout << "DEBUG gerou numeros aleatorios\n";
+  // pegar os 'n' primeiros
+  vector<int> targetIndices(allIndices.begin(), allIndices.begin() + n);
+  sort(targetIndices.begin(), targetIndices.end());
 
-  for (int i = 0; i < n; ++i) { // aqui ele le os n registros
-    cout << "DEBUG for passo" << i << endl;
-    int j = indices[i] * sizeof(GameReview);
-    binFile.seekg(j);
-    binFile.read(reinterpret_cast<char *>(&reviews[i]), sizeof(GameReview));
+  GameReview *vetor = new GameReview[n];
+
+  int atual = 0;
+  int pos = 0;       // posicao nos indices
+  int vectorPos = 0; // onde salvar no vetor de retorno
+
+  while (binFile && pos < n) {
+    uint32_t size;
+
+    if (!binFile.read(reinterpret_cast<char *>(&size), sizeof(size)))
+      break;
+
+    // Validação básica de sanidade
+    if (size == 0 || size > 1000000) {
+      cerr << "Registro corrompido ou inválido." << endl;
+      delete[] vetor;
+      return nullptr;
+    }
+
+    // Checa se o índice atual é um dos que queremos importar
+    if (atual == targetIndices[pos]) {
+      // É um alvo: LER os dados
+      vector<char> buffer(size);
+      binFile.read(buffer.data(), size);
+
+      string linha(buffer.begin(), buffer.end());
+      vetor[vectorPos].analisalinhaCSV(linha);
+
+      pos++;
+      vectorPos++;
+    } else {
+      // Não é um alvo: PULAR os dados (seek forward)
+      binFile.seekg(size, ios::cur);
+    }
+
+    atual++;
   }
-  cout << "DEBUG quase acabando\n";
 
-  binFile.close();
-  cout << "Endereço retornado = " << (void *)reviews << endl;
-  cout << "Primeiro elemento: " << reviews[0].recommendationid << endl;
-  return reviews;
+  // Embaralhar o vetor final para manter a aleatoriedade original
+  shuffle(vetor, vetor + n, default_random_engine(time(nullptr)));
+
+  return vetor;
 }

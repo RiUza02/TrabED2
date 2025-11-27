@@ -24,7 +24,7 @@ private:
   string author_steamid;
   float weighted_vote_score;
 
-  int countRecords();
+  static int countRecords();
 
 public:
   // Construtor
