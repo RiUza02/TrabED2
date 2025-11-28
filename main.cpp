@@ -124,13 +124,13 @@ int main() {
     cout << "2 - Exibir X jogos mais avaliados" << endl;
     cout << "3 - Sair" << endl;
     cout << "4 - Opcao extra para testes" << endl;
-    cout << "5 - Import" << endl;
-    cout << "6 - Contar jogos repetidos" << endl; // NOVA OPÇÃO
+    // cout << "5 - Import" << endl;
+    cout << "5 - Contar jogos repetidos" << endl; // NOVA OPÇÃO
     cout << "________________" << endl;
     cout << "Escolha uma opcao: ";
     cin >> opcao;
 
-    if (opcao < 1 || opcao > 6) {
+    if (opcao < 1 || opcao > 5) {
       cout << "Opcao invalida!" << endl;
       continue;
     }
@@ -193,23 +193,7 @@ int main() {
       break;
     }
 
-    case 5: {
-      cout << ">>> Import" << endl;
-      GameReview review;
-      int numReg;
-      cout << "Digite o numero de registros aleatorios que deseja: ";
-      cin >> numReg;
-      GameReview *importado = GameReview::import(numReg, caminho);
-      if (importado) {
-        for (int i = 0; i < numReg; i++) {
-          importado[i].print();
-        }
-        delete[] importado;
-      }
-      break;
-    }
-
-    case 6: { // NOVA OPÇÃO
+    case 5: { // NOVA OPÇÃO
       cout << ">>>> Contar jogos repetidos em registros aleatorios" << endl;
       int numReg;
       cout << "Digite o numero de registros aleatorios para analisar: ";
