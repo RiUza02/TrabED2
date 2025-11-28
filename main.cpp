@@ -5,26 +5,39 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <random>
 #include <vector>
 
 using namespace std;
 
-// Função para contar repetições de jogos
-void contarJogosRepetidos(int n, const string &caminho) {
-  cout << ">>>> Importando " << n << " registros aleatorios..." << endl;
+// Função para contar repetições de jogos usando os dados já lidos
+void contarJogosRepetidos(int n, const vector<Recomendacao> &recomendacoes) {
+  cout << ">>>> Selecionando " << n << " registros aleatorios..." << endl;
 
-  GameReview *reviews = GameReview::import(n, caminho);
-  if (!reviews) {
-    cout << "Erro ao importar registros!" << endl;
+  if (n > recomendacoes.size()) {
+    cout << "Erro: Numero solicitado (" << n << ") maior que total disponivel ("
+         << recomendacoes.size() << ")" << endl;
     return;
   }
+
+  // Cria uma cópia das recomendações para embaralhar
+  vector<Recomendacao> copiaRecomendacoes = recomendacoes;
+
+  // Embaralha aleatoriamente
+  random_device rd;
+  mt19937 g(rd());
+  shuffle(copiaRecomendacoes.begin(), copiaRecomendacoes.end(), g);
+
+  // Pega os primeiros N elementos
+  vector<Recomendacao> amostra(copiaRecomendacoes.begin(),
+                               copiaRecomendacoes.begin() + n);
 
   // Mapa para contar as repetições de cada appid
   map<int, int> contadorJogos;
 
   // Contar as ocorrências de cada jogo
-  for (int i = 0; i < n; i++) {
-    int appid = reviews[i].getAppId();
+  for (const auto &recomendacao : amostra) {
+    int appid = stoi(recomendacao.idAplicativo);
     contadorJogos[appid]++;
   }
 
@@ -57,13 +70,15 @@ void contarJogosRepetidos(int n, const string &caminho) {
   cout << "=============================================" << endl;
 
   // Exibir os top 10 jogos mais repetidos
-  cout << "\nTOP 10 JOGOS MAIS REPETIDOS:" << endl;
-  cout << "-----------------------------" << endl;
-  int limite = min(10, (int)jogosOrdenados.size());
+  if (!jogosOrdenados.empty()) {
+    cout << "\nTOP 10 JOGOS MAIS REPETIDOS:" << endl;
+    cout << "-----------------------------" << endl;
+    int limite = min(10, (int)jogosOrdenados.size());
 
-  for (int i = 0; i < limite; i++) {
-    cout << i + 1 << ". Jogo ID: " << jogosOrdenados[i].first
-         << " - Repetições: " << jogosOrdenados[i].second << endl;
+    for (int i = 0; i < limite; i++) {
+      cout << i + 1 << ". Jogo ID: " << jogosOrdenados[i].first
+           << " - Repetições: " << jogosOrdenados[i].second << endl;
+    }
   }
 
   // Exibir alguns exemplos de jogos que aparecem apenas uma vez
@@ -75,9 +90,8 @@ void contarJogosRepetidos(int n, const string &caminho) {
   }
 
   cout << "\nJogos que aparecem apenas uma vez: " << jogosUnicos << endl;
-
-  // Limpar memória
-  delete[] reviews;
+  cout << "Taxa de repetição: "
+       << (jogosComRepeticao * 100.0 / contadorJogos.size()) << "%" << endl;
 }
 
 int main() {
@@ -124,13 +138,13 @@ int main() {
     cout << "2 - Exibir X jogos mais avaliados" << endl;
     cout << "3 - Sair" << endl;
     cout << "4 - Opcao extra para testes" << endl;
-    // cout << "5 - Import" << endl;
-    cout << "5 - Contar jogos repetidos" << endl; // NOVA OPÇÃO
+    cout << "5 - Import" << endl;
+    cout << "6 - Contar jogos repetidos" << endl; // NOVA OPÇÃO
     cout << "________________" << endl;
     cout << "Escolha uma opcao: ";
     cin >> opcao;
 
-    if (opcao < 1 || opcao > 5) {
+    if (opcao < 1 || opcao > 6) {
       cout << "Opcao invalida!" << endl;
       continue;
     }
@@ -159,41 +173,35 @@ int main() {
     }
 
     case 4: {
-      int opcao;
       cout << ">>>> Opcao extra: Testar getReview" << endl;
-      cout << "Opção 1 - Testar getReview" << endl;
-      cout << "Opção 2 - Testar import" << endl;
-      cin >> opcao;
-      if (opcao == 1) {
-        cout << ">>> getReview" << endl;
-        GameReview review;
-        int index;
-        cout << "Digite o indice do registro a ser exibido: ";
-        cin >> index;
-        if (GameReview::getReview(index, review)) {
-          review.print();
-        } else {
-          cout << "Verifique se o indice é valido e tente novamente." << endl;
-        }
-
-      } else if (opcao == 2) {
-        cout << ">>> Import" << endl;
-        GameReview review;
-        int numReg;
-        cout << "Digite o numero de registros aleatorios que deseja: ";
-        cin >> numReg;
-        GameReview *importado = GameReview::import(numReg, caminho);
-        for (int i = 0; i < numReg; i++) {
-          importado[i].print();
-        }
+      GameReview review;
+      int index;
+      cout << "Digite o indice do registro a ser exibido: ";
+      cin >> index;
+      if (GameReview::getReview(index, review)) {
+        review.print();
       } else {
-        cout << ">>>> Opcao invalida! Voltando ao menu principal." << endl;
-        break;
+        cout << "Verifique se o indice é valido e tente novamente." << endl;
       }
       break;
     }
 
-    case 5: { // NOVA OPÇÃO
+    case 5: {
+      cout << ">>> Import" << endl;
+      int numReg;
+      cout << "Digite o numero de registros aleatorios que deseja: ";
+      cin >> numReg;
+      GameReview *importado = GameReview::import(numReg, caminho);
+      if (importado) {
+        for (int i = 0; i < numReg; i++) {
+          importado[i].print();
+        }
+        delete[] importado;
+      }
+      break;
+    }
+
+    case 6: { // NOVA OPÇÃO
       cout << ">>>> Contar jogos repetidos em registros aleatorios" << endl;
       int numReg;
       cout << "Digite o numero de registros aleatorios para analisar: ";
@@ -204,7 +212,7 @@ int main() {
         break;
       }
 
-      contarJogosRepetidos(numReg, caminho);
+      contarJogosRepetidos(numReg, recomendacoes);
       break;
     }
 
