@@ -24,30 +24,30 @@ void GameReview::print() const {
   cout << "__________________________________________" << endl;
 }
 
-void GameReview::createBinary(const std::string &path) {
+void GameReview::createBinary(const string &path) {
   // Abre o arquivo .csv
-  std::ifstream csvFile(path);
+  ifstream csvFile(path);
 
   if (!csvFile.is_open()) {
-    std::cerr << "Erro ao abrir o arquivo CSV!" << std::endl;
+    cerr << "Erro ao abrir o arquivo .csv!" << endl;
     return;
   }
 
   // Nomeia o arquivo bin com o mesmo nome do arquivo csv
-  std::string binPath = path.substr(0, path.find_last_of('.')) + ".bin";
+  string binPath = path.substr(0, path.find_last_of('.')) + ".bin";
 
   // Cria o arquivo .bin, se já existir um arquivo com esse nome ele apaga o
   // conteúdo do mesmo
-  std::ofstream bin(binPath, std::ios::binary);
+  ofstream bin(binPath, ios::binary);
 
   if (!bin.is_open()) {
-    std::cerr << "Erro ao abrir o arquivo Binário!" << std::endl;
+    cerr << "Erro ao abrir o arquivo .bin!" << endl;
     return;
   }
 
-  std::string line;
+  string line;
   // Percorre as linhas do arquivo .csv
-  while (std::getline(csvFile, line)) {
+  while (getline(csvFile, line)) {
     // Grava a linha para ler depois
     uint32_t size = line.size();
     bin.write(reinterpret_cast<const char *>(&size), sizeof(size));
@@ -221,7 +221,7 @@ GameReview *GameReview::import(int n, const string &caminho) {
   if (!binFile) {
     cerr << "Erro ao abrir arquivo binário." << endl;
     return nullptr;
-  }
+  } 
 
   int total = GameReview::countRecords();
   binFile.clear();
