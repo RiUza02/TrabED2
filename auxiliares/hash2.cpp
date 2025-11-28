@@ -4,7 +4,7 @@ using namespace std;
 
 /*
 ===========================================================
-  Classe: Hash2
+  Classe: RegistroHash2
   Objetivo: Implementar uma tabela hash com endereçamento
             aberto utilizando sondagem linear (linear probing).
 
@@ -17,7 +17,7 @@ using namespace std;
   - Chaves duplicadas NÃO são inseridas novamente.
 ===========================================================
 */
-class Hash2
+class RegistroHash2
 {
 private:
     vector<int> table;    // Armazena as chaves
@@ -32,7 +32,7 @@ private:
 
 public:
     // Construtor que inicializa a tabela hash com tamanho 's'
-    Hash2(int s) : size(s), colisoes(0), elementos(0)
+    RegistroHash2(int s) : size(s), colisoes(0), elementos(0)
     {
         table.resize(size, EMPTY);
         ocupado.resize(size, false);

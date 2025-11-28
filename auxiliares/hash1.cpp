@@ -4,7 +4,7 @@ using namespace std;
 
 /*
 ===========================================================
-  Classe: Hash1
+  Classe: RegistroHash1
   Descrição geral:
   - Cada posição da tabela armazena uma única chave inteira.
   - Colisões são resolvidas através da sondagem dupla:
@@ -15,7 +15,7 @@ using namespace std;
   - Chaves duplicadas NÃO são inseridas novamente.
 ===========================================================
 */
-class Hash1
+class RegistroHash1
 {
 private:
     vector<int> table;    // Armazena as chaves
@@ -55,7 +55,7 @@ private:
 
 public:
     // construtor que inicializa a tabela hash com tamanho 's'
-    Hash1(int s) : size(s), colisoes(0), elementos(0)
+    RegistroHash1(int s) : size(s), colisoes(0), elementos(0)
     {
         table.resize(size, EMPTY);
         ocupado.resize(size, false);

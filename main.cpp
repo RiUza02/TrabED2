@@ -106,7 +106,7 @@ void contarJogosRepetidos(int n, const vector<Recomendacao> &recomendacoes)
 
 int main()
 {
-    // Caminho do arquivo CSV
+    // Caminho do arquivo C SV
     std::string caminho = "public/reviews.csv";
 
     GameReview gameManager;
@@ -163,8 +163,8 @@ int main()
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> distrib(1, recomendacoes.size());
 
-            Hash1 tabela1(chave * 1.1); // Tamanho da tabela hash (sondagem dupla)
-            Hash2 tabela2(chave * 1.1); // Tamanho da tabela hash (sondagem linear
+            RegistroHash1 tabela1(chave * 1.1); // Tamanho da tabela hash (sondagem dupla)
+            RegistroHash2 tabela2(chave * 1.1); // Tamanho da tabela hash (sondagem linear
             for (int i = 0; i < chave; i++)
             {
                 int numero_aleatorio = distrib(gen);
