@@ -216,13 +216,6 @@ bool GameReview::getReview(int index, GameReview &review) {
   return false;
 }
 
-#include <algorithm> // for sort, shuffle
-#include <fstream>
-#include <iostream>
-#include <numeric> // for iota
-#include <random>  // for default_random_engine
-#include <vector>
-
 GameReview *GameReview::import(int n, const string &caminho) {
   ifstream binFile(caminho, ios::binary);
   if (!binFile) {
@@ -231,6 +224,8 @@ GameReview *GameReview::import(int n, const string &caminho) {
   }
 
   int total = GameReview::countRecords();
+  binFile.clear();
+  binFile.seekg(0);
   if (total <= 0 || n > total) {
     cerr << "Erro: Quantidade solicitada (" << n
          << ") inválida ou maior que o total (" << total << ")." << endl;
@@ -259,16 +254,15 @@ GameReview *GameReview::import(int n, const string &caminho) {
     if (!binFile.read(reinterpret_cast<char *>(&size), sizeof(size)))
       break;
 
-    // Validação básica de sanidade
-    if (size == 0 || size > 1000000) {
-      cerr << "Registro corrompido ou inválido." << endl;
+    if (size == 0) {
+      cerr << "Registro corrompido ou inválido. Size = " << size << endl;
       delete[] vetor;
       return nullptr;
     }
 
     // Checa se o índice atual é um dos que queremos importar
     if (atual == targetIndices[pos]) {
-      // É um alvo: LER os dados
+      // É um alvo
       vector<char> buffer(size);
       binFile.read(buffer.data(), size);
 
@@ -278,7 +272,6 @@ GameReview *GameReview::import(int n, const string &caminho) {
       pos++;
       vectorPos++;
     } else {
-      // Não é um alvo: PULAR os dados (seek forward)
       binFile.seekg(size, ios::cur);
     }
 
