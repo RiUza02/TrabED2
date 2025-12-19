@@ -47,23 +47,22 @@ int main()
         int numero_aleatorio = distrib(gen);
 
         // insere o id do aplicativo na arvore
-        int chave = stoi(recomendacoes[numero_aleatorio].idAplicativo);
-        arvore.inserir(chave);
-
-        /*
-        // cria uma chave baseada na concatenação do id do app e do id do autor
-        std::string idApp = std::to_string(stoi(recomendacoes[numero_aleatorio].idAplicativo));
-        std::string autorID = std::to_string(stoi(recomendacoes[numero_aleatorio].idAutor));
-        */
+        string idApp = recomendacoes[numero_aleatorio].idAplicativo;
+        string idAutor = recomendacoes[numero_aleatorio].idAutor;
+        arvore.inserir(idApp, idAutor);
     }
 
+    // ------------------------------
+    // Imprime os valores da árvore em ordem crescente
+    // ------------------------------
     cout << "Valores na arvore (em ordem crescente): ";
     arvore.imprimir();
 
     // Teste de busca
-    int alvo = 1280420;
-    cout << "Buscando o valor " << alvo << "... " << endl;
-    if (arvore.buscar(alvo))
+    string idApp = recomendacoes[0].idAplicativo;
+    string idAutor = recomendacoes[0].idAutor;
+    cout << "Buscando o valor " << idApp + idApp << "... " << endl;
+    if (arvore.buscar(idApp, idAutor))
     {
         cout << "Resultado: O valor foi encontrado!" << endl;
     }
