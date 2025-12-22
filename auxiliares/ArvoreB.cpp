@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <string>
 #include <random>
+#include <ctime>
+#include <iomanip>
+#include <fstream>
 
 using namespace std;
 
@@ -27,14 +30,22 @@ private:
     NoB *raiz;
     int M;
     int totalElementos;
+    int numComparacao; 
 
     // Busca Recursiva
     bool buscarRecursivo(NoB *atual, string k)
     {
         int i = 0;
-        while (i < atual->chaves.size() && k > atual->chaves[i])
-            i++;
-
+        while (i < atual->chaves.size())
+        {
+            numComparacao++;
+            if (k > atual->chaves[i])
+                i++;
+            else
+                break;
+        }
+        
+        numComparacao++; // Conta a comparação de igualdade/falha logo abaixo
         if (i < atual->chaves.size() && atual->chaves[i] == k)
             return true;
 
@@ -76,22 +87,40 @@ private:
         if (no->folha)
         {
             no->chaves.push_back("");
-            while (i >= 0 && no->chaves[i] > k)
+
+            while (i >= 0)
             {
-                no->chaves[i + 1] = no->chaves[i];
-                i--;
+                numComparacao++;
+                if (no->chaves[i] > k)
+                {
+                    no->chaves[i + 1] = no->chaves[i];
+                    i--;
+                }
+                else
+                {
+                    break;
+                }
             }
+
             no->chaves[i + 1] = k;
         }
         else
         {
-            while (i >= 0 && no->chaves[i] > k)
-                i--;
+            while (i >= 0)
+            {
+                numComparacao++;
+                if (no->chaves[i] > k)
+                    i--;
+                else
+                    break;
+            }
             i++;
 
             if (no->filhos[i]->chaves.size() == M - 1)
             {
                 dividirFilho(no, i, no->filhos[i]);
+                
+                numComparacao++;
                 if (k > no->chaves[i])
                     i++;
             }
@@ -99,50 +128,38 @@ private:
         }
     }
 
-    // ------------------------------------------------------------------
-    // NOVO: Método de Impressão In-Ordem (Recursivo)
-    // Percorre a árvore da esquerda para a direita, gerando a lista ordenada.
-    // ------------------------------------------------------------------
+    void deletarArvore(NoB* no) {
+        if (!no) return;
+        if (!no->folha) {
+            for (auto filho : no->filhos) {
+                deletarArvore(filho);
+            }
+        }
+        delete no;
+    }
+
+    // Impressão In-Ordem (Recursivo)
     void imprimirInOrdemRecursivo(NoB *no)
     {
-        if (!no)
-            return;
-
+        if (!no) return;
         int i;
-        // Percorre todas as chaves do nó
         for (i = 0; i < no->chaves.size(); i++)
         {
-            // Se não for folha, visita o filho à esquerda da chave[i] antes de imprimir
-            if (!no->folha)
-            {
-                imprimirInOrdemRecursivo(no->filhos[i]);
-            }
-
-            // Imprime a chave atual
+            if (!no->folha) imprimirInOrdemRecursivo(no->filhos[i]);
             cout << no->chaves[i] << endl;
         }
-
-        // Importante: Visitar o último filho (à direita da última chave)
-        if (!no->folha)
-        {
-            imprimirInOrdemRecursivo(no->filhos[i]);
-        }
+        if (!no->folha) imprimirInOrdemRecursivo(no->filhos[i]);
     }
 
     // Impressão Visual Hierárquica
     void imprimirVisualRecursivo(NoB *no, string prefixo, bool ehUltimo)
     {
-        if (!no)
-            return;
-
+        if (!no) return;
         cout << prefixo;
-        if (ehUltimo)
-        {
+        if (ehUltimo) {
             cout << "L__ ";
             prefixo += "    ";
-        }
-        else
-        {
+        } else {
             cout << "|__ ";
             prefixo += "|   ";
         }
@@ -163,22 +180,24 @@ public:
     ArvoreB(int ordem) : raiz(nullptr), M(ordem)
     {
         totalElementos = 0;
+        numComparacao = 0;
+    }
+    
+    ~ArvoreB()
+    {
+        deletarArvore(raiz);
     }
 
     void inserir(string a, string b)
     {
         string k = a + b;
 
-        // --------------------------------------------------
-        // BLOQUEIO DE DUPLICATAS
-        // --------------------------------------------------
+        // Se a chave já existe, não insere (buscar já incrementa comparacoes)
         if (raiz != nullptr && buscar(a, b))
         {
-            // Chave já existe → não insere
             return;
         }
 
-        // Inserção normal
         totalElementos++;
         if (!raiz)
         {
@@ -208,10 +227,23 @@ public:
         return (raiz == nullptr) ? false : buscarRecursivo(raiz, k);
     }
 
-    // ------------------------------------------------------------------
-    // Método imprimir (Interface Pública Atualizada)
-    // Agora chama as duas formas de impressão.
-    // ------------------------------------------------------------------
+    void resetComparacoes() {
+        numComparacao = 0;
+    }
+    
+ 
+    int getComparacoes() const {
+        return numComparacao;
+    }
+
+
+    struct ResultadoTeste {
+        double tempoExecucao; 
+        int comparacoesInsercao;
+        double tempoBusca; 
+        int comparacoesBusca;
+    }; 
+    
     void imprimir()
     {
         if (!raiz)
@@ -220,19 +252,15 @@ public:
             return;
         }
 
-        // 1. Impressão Visual
         cout << "=== ESTRUTURA VISUAL DA ARVORE ===" << endl;
         imprimirVisualRecursivo(raiz, "", true);
         cout << endl;
 
-        // 2. Impressão Ordenada
         cout << "=== LISTAGEM ORDENADA (IN-ORDER) ===" << endl;
         imprimirInOrdemRecursivo(raiz);
         cout << "====================================" << endl;
 
         cout << "=== TOTAL DE ELEMENTOS: " << totalElementos << " chaves ===" << endl;
-        cout << "====================================" << endl
-             << endl
-             << endl;
+        cout << "====================================" << endl << endl << endl;
     }
 };
