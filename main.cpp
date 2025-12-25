@@ -12,6 +12,92 @@
 
 using namespace std;
 
+void metodosCompDescomp(){
+    cout<<"Numero de registros: "
+    int n;
+    cin>>n;
+    GameReview *importado = GameReview::import(n, "public/reviews.csv"); // Importa N registros aleatorios
+
+    string str = importado->converteString();
+
+    int i;
+    cout<< "1 - Métodos de Compressão (string)\n2 - Métodos de Compressão (arquivo)\n3 - Métodos de Descompressão (string)\n4 - Métodos de Descompressão (arquivo)\nEscolha: ";
+    cin>>i;
+    int m;
+    while(m>2){
+        cout<<"Algoritmos:\n0 - Huffman\n1 - LZ77\n2 - LZW\nEscolha: ";
+        cin>>m;
+    }
+    switch(i){
+        case(1):
+            cout<<"String comprimida: "<< comprime(str,m);
+            break;
+        case(2):
+            comprime(m)
+            break;
+        case(3):
+            cout<<"String descomprimida: "<<descomprime(str,m)
+            break;
+        case(4):
+            descomprime(m);
+    }
+}
+
+string comprime(string str, int metodo){
+    switch(metodo){
+        case 0: //huffman
+            
+            break;
+        case 1: //lz77
+            
+            break;
+        case 2: //lzw
+            
+            break;
+    }
+}
+
+string descomprime(string str, int metodo){
+    switch(metodo){
+        case 0: //huffman
+            
+            break;
+        case 1: //lz77
+            
+            break;
+        case 2: //lzw
+            
+            break;
+    }
+}
+
+void comprime(int metodo){
+    switch(metodo){
+        case 0: //huffman
+            
+            break;
+        case 1: //lz77
+            
+            break;
+        case 2: //lzw
+            
+            break;
+    }
+}
+
+void descomprime(int metodo){
+    switch(metodo){
+        case 0: //huffman
+            
+            break;
+        case 1: //lz77
+            
+            break;
+        case 2: //lzw
+            
+            break;
+    }
+}
 
 // FUNÇÃO DA ETAPA 3: Análise de Desempenho
 void executarAnaliseArvoreB() {
@@ -149,7 +235,7 @@ int main() {
     do {
         cout << "\nMENU INTERATIVO:" << endl;
         cout << "1 - Estruturas balanceadas - Arvore B (Etapa 3)" << endl; 
-        cout << "2 - Compressão (Etapa 4)" << endl;    
+        cout << "2 - Compressão/Descompressão (Etapa 4)" << endl;    
         cout << "0 - Sair" << endl;
         cout << "Opcao: ";
         cin >> opcao;
@@ -159,6 +245,7 @@ int main() {
                 executarAnaliseArvoreB();
                 break;
             case 2:
+                metodosCompDescomp();
                 break;
             case 0:
                 cout << "Encerrando programa..." << endl;

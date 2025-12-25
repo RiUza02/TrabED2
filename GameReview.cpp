@@ -283,3 +283,16 @@ GameReview *GameReview::import(int n, const string &caminho) {
 
   return vetor;
 }
+
+string GameReview::converteString() {
+    stringstream ss;
+    
+    // Concatena os campos separados por um delimitador (ex: ponto e vírgula)
+    // para garantir que a descompressão seja possível e organizada.
+    ss << recommendationid << ";"
+       << appid << ";"
+       << author_steamid << ";"
+       << fixed << setprecision(2) << weighted_vote_score;
+    
+    return ss.str();
+}
