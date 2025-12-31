@@ -8,7 +8,8 @@
 
 #include "GameReview.h"           
 #include "auxiliares/leitura.h"   
-#include "auxiliares/ArvoreB.cpp" 
+#include "auxiliares/ArvoreB.cpp"
+#include "auxiliares/Huffman.h"
 
 using namespace std;
 
@@ -16,14 +17,14 @@ void metodosCompDescomp(){
     cout<<"Numero de registros: "
     int n;
     cin>>n;
-    GameReview *importado = GameReview::import(n, "public/reviews.csv"); // Importa N registros aleatorios
+    // GameReview *importado = GameReview::import(n, "public/reviews.csv"); // Importa N registros aleatorios
 
-    string str = importado->converteString();
-
+    //string str = importado->converteString();
+    string str;
     int i;
     cout<< "1 - Métodos de Compressão (string)\n2 - Métodos de Compressão (arquivo)\n3 - Métodos de Descompressão (string)\n4 - Métodos de Descompressão (arquivo)\nEscolha: ";
     cin>>i;
-    int m;
+    int m = 3;
     while(m>2){
         cout<<"Algoritmos:\n0 - Huffman\n1 - LZ77\n2 - LZW\nEscolha: ";
         cin>>m;
@@ -46,7 +47,7 @@ void metodosCompDescomp(){
 string comprime(string str, int metodo){
     switch(metodo){
         case 0: //huffman
-            
+            comprimirHuffman(str);
             break;
         case 1: //lz77
             

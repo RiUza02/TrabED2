@@ -51,8 +51,5 @@ public:
 
   // Importa N reviews aleatórias do arquivo binário
   static GameReview *import(int n, const string &caminho);
-
-  // Concatena string
-  string GameReview::converteString()
 };
 #endif // GAMEREVIEW_H
