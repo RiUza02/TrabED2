@@ -5,88 +5,13 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
-#include <random>
-#include <string>
-#include <vector>
+
+#include "GameReview.h"           
+#include "auxiliares/leitura.h"   
+#include "auxiliares/ArvoreB.cpp" 
 
 using namespace std;
 
-void gerarArquivoImport(int n) {
-  GameReview *GR = new GameReview;
-
-  GR->createBinary("public/reviews.csv");
-  delete GR;
-
-  GameReview *registros = GameReview::import(n, "public/reviews.bin");
-
-  if (!registros) {
-    cerr << "Erro fatal: Nao foi possivel importar registros." << endl;
-    return;
-  }
-
-  ofstream arquivoTxt("reviewsOrig.txt");
-  for (int i = 0; i < n; i++) {
-    arquivoTxt << registros[i].getRecommendationId() << ","
-               << registros[i].getAppId() << ","
-               << registros[i].getAuthorSteamId() << ","
-               << registros[i].getWeightedVoteScore() << "\n";
-  }
-  arquivoTxt.close();
-  delete[] registros;
-}
-
-double executarCompressao(int metodo) {
-  string arqOrigem = "reviewsOrig.txt";
-  string arqSaida = "reviewsComp.bin";
-
-  if (metodo == 0) {
-    Huffman huff;
-    huff.comprimeArquivo(arqOrigem, arqSaida);
-
-    ifstream orig(arqOrigem, ios::binary | ios::ate);
-    ifstream comp(arqSaida, ios::binary | ios::ate);
-
-    if (!orig.is_open() || !comp.is_open())
-      return 0.0;
-
-    long tamOrig = orig.tellg();
-    long tamComp = comp.tellg();
-
-    orig.close();
-    comp.close();
-
-    double taxa = (1.0 - (double)tamComp / tamOrig) * 100.0;
-
-    cout << "   [Relatorio] Original: " << tamOrig
-         << " bytes -> Comprimido: " << tamComp << " bytes" << endl;
-    cout << "   [Relatorio] Taxa de compressao: " << fixed << setprecision(2)
-         << taxa << "%" << endl;
-
-    return taxa;
-  } else if (metodo == 1) {
-    cout << "LZ77: A implementar." << endl;
-    return 0.0;
-  } else if (metodo == 2) {
-    cout << "LZW: A implementar." << endl;
-    return 0.0;
-  }
-  return 0.0;
-}
-
-void executarDescompressao(int metodo) {
-  string arqComp = "reviewsComp.bin";
-  string arqSaida = "reviewsDesc.txt";
-
-  if (metodo == 0) {
-    Huffman huff;
-    huff.descomprimeArquivo(arqComp, arqSaida);
-  } else {
-    cout << "Metodo de descompressao nao implementado." << endl;
-  }
-}
-
-//-------------------------------------------------
 
 // FUNÇÃO DA ETAPA 3: Análise de Desempenho
 void executarAnaliseArvoreB() {
@@ -228,64 +153,78 @@ void executarAnaliseArvoreB() {
   arquivoSaida.close();
 }
 
+// Função para teste rápido do LZW
+void testarLZW() {
+    cout << "\n========================================" << endl;
+    cout << "TESTE RÁPIDO LZW" << endl;
+    cout << "========================================" << endl;
+    
+    cout << "1. Testar compressão/descompressão de string" << endl;
+    cout << "2. Testar compressão de arquivo (reviewsOrig.txt -> reviewsComp.bin)" << endl;
+    cout << "3. Testar descompressão de arquivo (reviewsComp.bin -> reviewsDesc.txt)" << endl;
+    cout << "Escolha: ";
+    
+    int opcao;
+    cin >> opcao;
+    
+    switch(opcao) {
+        case 1: {
+            cout << "Digite uma string para testar: ";
+            cin.ignore();
+            string teste;
+            getline(cin, teste);
+            
+            string comprimido = GameReview::comprime(teste, 2);
+            cout << "String comprimida (LZW): " << comprimido << endl;
+            
+            string descomprimido = GameReview::descomprime(comprimido, 2);
+            cout << "String descomprimida: " << descomprimido << endl;
+            
+            if (teste == descomprimido) {
+                cout << "✓ Compressão/descompressão funcionou corretamente!" << endl;
+            } else {
+                cout << "✗ Erro na compressão/descompressão!" << endl;
+            }
+            break;
+        }
+        case 2:
+            cout << "Comprimindo arquivo reviewsOrig.txt..." << endl;
+            GameReview::comprime(2); // 2 = LZW
+            break;
+        case 3:
+            cout << "Descomprimindo arquivo reviewsComp.bin..." << endl;
+            GameReview::descomprime(2); // 2 = LZW
+            break;
+        default:
+            cout << "Opção inválida!" << endl;
+    }
+}
+
 // MAIN
 int main() {
   int opcao = 0;
 
-  do {
-    cout << "\nMENU INTERATIVO:" << endl;
-    cout << "1 - Estruturas balanceadas - Arvore B (Etapa 3)" << endl;
-    cout << "2 - Compressão (Etapa 4)" << endl;
-    cout << "0 - Sair" << endl;
-    cout << "Opcao: ";
-    cin >> opcao;
+    do {
+        cout << "\nMENU INTERATIVO:" << endl;
+        cout << "1 - Estruturas balanceadas - Arvore B (Etapa 3)" << endl; 
+        cout << "2 - Compressão (Etapa 4)" << endl;    
+        cout << "0 - Sair" << endl;
+        cout << "Opcao: ";
+        cin >> opcao;
 
-    switch (opcao) {
-    case 1:
-      executarAnaliseArvoreB();
-      break;
-    case 2: {
-      int n_registros;
-      int M = 3; // Quantidade de execuções para média pro relatorio
-      cout << "Digite o numero de registros a importar: ";
-      cin >> n_registros;
-
-      cout << "\nEscolha o metodo (0=Huffman, 1=LZ77, 2=LZW): ";
-      int met;
-      cin >> met;
-
-      double somaTaxas = 0.0;
-
-      // Loop das M execuções
-      for (int i = 0; i < M; i++) {
-        cout << "\n--- Execucao " << (i + 1) << " de " << M << " ---" << endl;
-        gerarArquivoImport(n_registros);
-        cout << "Gerando arquivo de texto com " << n_registros
-             << " registros..." << endl;
-        somaTaxas += executarCompressao(met);
-        executarDescompressao(met);
-      }
-
-      double media = somaTaxas / M;
-      cout << "\n==============================================" << endl;
-      cout << "MEDIA DA TAXA DE COMPRESSAO: " << fixed << setprecision(2)
-           << media << "%" << endl;
-      cout << "==============================================" << endl;
-
-      // Salvar no saida.txt para comparacao
-      ofstream saida("saida.txt", ios::app);
-      saida << "Metodo " << met << " - Media Taxa: " << media << "%" << endl;
-      saida.close();
-
-      break;
-    }
-    case 0:
-      cout << "Encerrando programa..." << endl;
-      break;
-    default:
-      cout << "Opcao invalida!" << endl;
-    }
-  } while (opcao != 0);
+        switch (opcao) {
+            case 1:
+                executarAnaliseArvoreB();
+                break;
+            case 2:
+                break;
+            case 0:
+                cout << "Encerrando programa..." << endl;
+                break;
+            default:
+                cout << "Opcao invalida!" << endl;
+        }
+    } while (opcao != 0);
 
   return 0;
 }

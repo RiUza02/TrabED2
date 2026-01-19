@@ -15,28 +15,16 @@ else
     CLEAN_OBJS = rm -f *.o
 endif
 
+# Lista de objetos
+OBJ = main.o GameReview.o LZW.o
+
 all: $(TARGET)
 
-# 1. LINKAGEM: Junta main.o + GameReview.o + Huffman.o para criar o executável
-$(TARGET): main.o GameReview.o Huffman.o
-	$(CXX) $(CXXFLAGS) -o $(TARGET) main.o GameReview.o Huffman.o
-
-# 2. Compila o main (cria main.o)
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
-
-# 3. Compila o GameReview (cria GameReview.o)
-GameReview.o: GameReview.cpp GameReview.h
-	$(CXX) $(CXXFLAGS) -c GameReview.cpp
-
-# 4. Compila o Huffman que está na pasta auxiliares (cria Huffman.o)
-Huffman.o: auxiliares/Huffman.cpp auxiliares/Huffman.h
-	$(CXX) $(CXXFLAGS) -c auxiliares/Huffman.cpp -o Huffman.o
+$(TARGET): main.cpp
+	$(CXX) $(CXXFLAGS) -o $(TARGET) main.cpp
 
 run: all
 	$(RUN)
 
 clean:
 	$(RM) $(TARGET)
-	$(CLEAN_OBJS)
-	$(RM) reviewsOrig.txt reviewsComp.bin reviewsDesc.txt
