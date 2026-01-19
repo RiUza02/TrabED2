@@ -1,32 +1,23 @@
-# Prerequisites
-*.d
+# Executáveis
+main
+teste_*
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Arquivos de dados temporários
+reviews.bin
+reviewsComp.bin
+reviewsDesc.txt
+reviewsOrig.txt
+saida.txt
 
-# Precompiled Headers
-*.gch
-*.pch
+# Backup files
+*.backup
+*.errado
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Editor temporários
+*.swp
+*.swo
+*~
 
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# Binários do sistema
+.DS_Store
+Thumbs.db
