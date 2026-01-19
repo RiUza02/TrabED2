@@ -1,6 +1,7 @@
 #include "GameReview.h"
 #include "auxiliares/ArvoreB.cpp"
 #include "auxiliares/Huffman.h"
+#include "auxiliares/LZ77.h"
 #include "auxiliares/leitura.h"
 #include <ctime>
 #include <fstream>
@@ -65,8 +66,29 @@ double executarCompressao(int metodo) {
 
     return taxa;
   } else if (metodo == 1) {
-    cout << "LZ77: A implementar." << endl;
-    return 0.0;
+    LZ77 lz77;
+    lz77.comprimeArquivo(arqOrigem, arqSaida);
+
+    ifstream orig(arqOrigem, ios::binary | ios::ate);
+    ifstream comp(arqSaida, ios::binary | ios::ate);
+
+    if (!orig.is_open() || !comp.is_open())
+      return 0.0;
+
+    long tamOrig = orig.tellg();
+    long tamComp = comp.tellg();
+
+    orig.close();
+    comp.close();
+
+    double taxa = (1.0 - (double)tamComp / tamOrig) * 100.0;
+
+    cout << "   [Relatorio] Original: " << tamOrig
+         << " bytes -> Comprimido: " << tamComp << " bytes" << endl;
+    cout << "   [Relatorio] Taxa de compressao: " << fixed << setprecision(2)
+         << taxa << "%" << endl;
+
+    return taxa;
   } else if (metodo == 2) {
     cout << "LZW: A implementar." << endl;
     return 0.0;
@@ -81,6 +103,9 @@ void executarDescompressao(int metodo) {
   if (metodo == 0) {
     Huffman huff;
     huff.descomprimeArquivo(arqComp, arqSaida);
+  } else if (metodo == 1) {
+    LZ77 lz77;
+    lz77.descomprimeArquivo(arqComp, arqSaida);
   } else {
     cout << "Metodo de descompressao nao implementado." << endl;
   }
