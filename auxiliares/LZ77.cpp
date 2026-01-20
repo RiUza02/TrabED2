@@ -25,6 +25,7 @@ void LZ77::comprimeArquivo(const string& arqOrigem, const string& arqSaida) {
 
     in.close();
     out.close();
+    cout << "   [LZ77] Compressao concluida!" << endl;
 }
 
 void LZ77::descomprimeArquivo(const string& arqOrigem, const string& arqSaida) {
@@ -42,7 +43,7 @@ void LZ77::descomprimeArquivo(const string& arqOrigem, const string& arqSaida) {
 
     in.close();
     out.close();
-}
+    cout << "   [LZ77] Descompressao concluida!" << endl;
 
 
 string LZ77::comprimeLZ77(const string& input) {

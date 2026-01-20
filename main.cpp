@@ -14,24 +14,27 @@
 using namespace std;
 
 void gerarArquivoImport(int n) {
-  cout << "Gerando arquivo de teste com " << n << " registros..." << endl;
-  
-  // Cria arquivo CSV de teste simples
-  ofstream arquivoTxt("reviewsOrig.txt");
-  
-  // Cabeçalho
-  arquivoTxt << "recommendationId,appId,authorSteamId,weightedVoteScore\n";
-  
-  // Dados de teste realistas
-  for (int i = 0; i < n; i++) {
-    arquivoTxt << (1000000 + i) << ","
-               << (730 + (i % 50)) << ","
-               << (76561197960287930 + i) << ","
-               << fixed << setprecision(2) << (0.1 + (i % 10) * 0.1) << "\n";
+  GameReview *GR = new GameReview;
+
+  GR->createBinary("public/reviews.csv");
+  delete GR;
+
+  GameReview *registros = GameReview::import(n, "public/reviews.bin");
+
+  if (!registros) {
+    cerr << "Erro fatal: Nao foi possivel importar registros." << endl;
+    return;
   }
-  
+
+  ofstream arquivoTxt("reviewsOrig.txt");
+  for (int i = 0; i < n; i++) {
+    arquivoTxt << registros[i].getRecommendationId() << ","
+               << registros[i].getAppId() << ","
+               << registros[i].getAuthorSteamId() << ","
+               << registros[i].getWeightedVoteScore() << "\n";
+  }
   arquivoTxt.close();
-  cout << "Arquivo reviewsOrig.txt criado com " << n << " registros." << endl;
+  delete[] registros;
 }
 
 double executarCompressao(int metodo) {
