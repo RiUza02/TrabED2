@@ -1,7 +1,6 @@
 #include "GameReview.h"
 #include "auxiliares/ArvoreB.cpp"
 #include "auxiliares/Huffman.h"
-#include "auxiliares/LZ77.h"
 #include "auxiliares/leitura.h"
 #include <ctime>
 #include <fstream>
@@ -14,27 +13,24 @@
 using namespace std;
 
 void gerarArquivoImport(int n) {
-  GameReview *GR = new GameReview;
-
-  GR->createBinary("public/reviews.csv");
-  delete GR;
-
-  GameReview *registros = GameReview::import(n, "public/reviews.bin");
-
-  if (!registros) {
-    cerr << "Erro fatal: Nao foi possivel importar registros." << endl;
-    return;
-  }
-
+  cout << "Gerando arquivo de teste com " << n << " registros..." << endl;
+  
+  // Cria arquivo CSV de teste simples
   ofstream arquivoTxt("reviewsOrig.txt");
+  
+  // Cabeçalho
+  arquivoTxt << "recommendationId,appId,authorSteamId,weightedVoteScore\n";
+  
+  // Dados de teste realistas
   for (int i = 0; i < n; i++) {
-    arquivoTxt << registros[i].getRecommendationId() << ","
-               << registros[i].getAppId() << ","
-               << registros[i].getAuthorSteamId() << ","
-               << registros[i].getWeightedVoteScore() << "\n";
+    arquivoTxt << (1000000 + i) << ","
+               << (730 + (i % 50)) << ","
+               << (76561197960287930 + i) << ","
+               << fixed << setprecision(2) << (0.1 + (i % 10) * 0.1) << "\n";
   }
+  
   arquivoTxt.close();
-  delete[] registros;
+  cout << "Arquivo reviewsOrig.txt criado com " << n << " registros." << endl;
 }
 
 double executarCompressao(int metodo) {
@@ -66,29 +62,8 @@ double executarCompressao(int metodo) {
 
     return taxa;
   } else if (metodo == 1) {
-    LZ77 lz77;
-    lz77.comprimeArquivo(arqOrigem, arqSaida);
-
-    ifstream orig(arqOrigem, ios::binary | ios::ate);
-    ifstream comp(arqSaida, ios::binary | ios::ate);
-
-    if (!orig.is_open() || !comp.is_open())
-      return 0.0;
-
-    long tamOrig = orig.tellg();
-    long tamComp = comp.tellg();
-
-    orig.close();
-    comp.close();
-
-    double taxa = (1.0 - (double)tamComp / tamOrig) * 100.0;
-
-    cout << "   [Relatorio] Original: " << tamOrig
-         << " bytes -> Comprimido: " << tamComp << " bytes" << endl;
-    cout << "   [Relatorio] Taxa de compressao: " << fixed << setprecision(2)
-         << taxa << "%" << endl;
-
-    return taxa;
+    cout << "LZ77: A implementar." << endl;
+    return 0.0;
   } else if (metodo == 2) {
     // LZW - USANDO FUNÇÃO PÚBLICA comprime(int metodo)
     GameReview lzw;
@@ -149,9 +124,6 @@ void executarDescompressao(int metodo) {
   if (metodo == 0) {
     Huffman huff;
     huff.descomprimeArquivo(arqComp, arqSaida);
-  } else if (metodo == 1) {
-    LZ77 lz77;
-    lz77.descomprimeArquivo(arqComp, arqSaida);
   } else if (metodo == 2) {
     // LZW - USANDO FUNÇÃO PÚBLICA descomprime(string, int)
     GameReview lzw;
@@ -181,6 +153,8 @@ void executarDescompressao(int metodo) {
     saida.close();
     
     cout << "   [LZW] Descompressao concluida!" << endl;
+  } else {
+    cout << "Metodo de descompressao nao implementado." << endl;
   }
 }
 
