@@ -1,6 +1,8 @@
 #include "GameReview.h"
+#include "LZW.cpp"
 #include "auxiliares/ArvoreB.cpp"
 #include "auxiliares/Huffman.h"
+#include "auxiliares/LZ77.h"
 #include "auxiliares/leitura.h"
 #include <ctime>
 #include <fstream>
@@ -13,24 +15,27 @@
 using namespace std;
 
 void gerarArquivoImport(int n) {
-  cout << "Gerando arquivo de teste com " << n << " registros..." << endl;
-  
-  // Cria arquivo CSV de teste simples
-  ofstream arquivoTxt("reviewsOrig.txt");
-  
-  // Cabeçalho
-  arquivoTxt << "recommendationId,appId,authorSteamId,weightedVoteScore\n";
-  
-  // Dados de teste realistas
-  for (int i = 0; i < n; i++) {
-    arquivoTxt << (1000000 + i) << ","
-               << (730 + (i % 50)) << ","
-               << (76561197960287930 + i) << ","
-               << fixed << setprecision(2) << (0.1 + (i % 10) * 0.1) << "\n";
+  GameReview *GR = new GameReview;
+
+  GR->createBinary("public/reviews.csv");
+  delete GR;
+
+  GameReview *registros = GameReview::import(n, "public/reviews.bin");
+
+  if (!registros) {
+    cerr << "Erro fatal: Nao foi possivel importar registros." << endl;
+    return;
   }
-  
+
+  ofstream arquivoTxt("reviewsOrig.txt");
+  for (int i = 0; i < n; i++) {
+    arquivoTxt << registros[i].getRecommendationId() << ","
+               << registros[i].getAppId() << ","
+               << registros[i].getAuthorSteamId() << ","
+               << registros[i].getWeightedVoteScore() << "\n";
+  }
   arquivoTxt.close();
-  cout << "Arquivo reviewsOrig.txt criado com " << n << " registros." << endl;
+  delete[] registros;
 }
 
 double executarCompressao(int metodo) {
@@ -62,36 +67,58 @@ double executarCompressao(int metodo) {
 
     return taxa;
   } else if (metodo == 1) {
-    cout << "LZ77: A implementar." << endl;
-    return 0.0;
+    LZ77 lz77;
+    lz77.comprimeArquivo(arqOrigem, arqSaida);
+
+    ifstream orig(arqOrigem, ios::binary | ios::ate);
+    ifstream comp(arqSaida, ios::binary | ios::ate);
+
+    if (!orig.is_open() || !comp.is_open())
+      return 0.0;
+
+    long tamOrig = orig.tellg();
+    long tamComp = comp.tellg();
+
+    orig.close();
+    comp.close();
+
+    double taxa = (1.0 - (double)tamComp / tamOrig) * 100.0;
+
+    cout << "   [Relatorio] Original: " << tamOrig
+         << " bytes -> Comprimido: " << tamComp << " bytes" << endl;
+    cout << "   [Relatorio] Taxa de compressao: " << fixed << setprecision(2)
+         << taxa << "%" << endl;
+
+    return taxa;
   } else if (metodo == 2) {
     // LZW - USANDO FUNÇÃO PÚBLICA comprime(int metodo)
     GameReview lzw;
-    
-    // Primeiro, precisamos ler o arquivo para passar para a função comprime(string, int)
+
+    // Primeiro, precisamos ler o arquivo para passar para a função
+    // comprime(string, int)
     ifstream entrada(arqOrigem);
     if (!entrada) {
       cerr << "Erro ao abrir: " << arqOrigem << endl;
       return 0.0;
     }
-    
-    string conteudo((istreambuf_iterator<char>(entrada)), 
+
+    string conteudo((istreambuf_iterator<char>(entrada)),
                     istreambuf_iterator<char>());
     entrada.close();
-    
+
     // Comprime usando a função pública
     string comprimido = lzw.comprime(conteudo, 2);
-    
+
     // Salva o resultado comprimido
     ofstream saida(arqSaida);
     if (!saida) {
       cerr << "Erro ao criar: " << arqSaida << endl;
       return 0.0;
     }
-    
+
     saida << comprimido;
     saida.close();
-    
+
     // Cálculo da taxa de compressão
     ifstream orig(arqOrigem, ios::binary | ios::ate);
     ifstream comp(arqSaida, ios::binary | ios::ate);
@@ -109,8 +136,8 @@ double executarCompressao(int metodo) {
 
     cout << "   [LZW] Original: " << tamOrig
          << " bytes -> Comprimido: " << tamComp << " bytes" << endl;
-    cout << "   [LZW] Taxa de compressao: " << fixed << setprecision(2)
-         << taxa << "%" << endl;
+    cout << "   [LZW] Taxa de compressao: " << fixed << setprecision(2) << taxa
+         << "%" << endl;
 
     return taxa;
   }
@@ -124,37 +151,38 @@ void executarDescompressao(int metodo) {
   if (metodo == 0) {
     Huffman huff;
     huff.descomprimeArquivo(arqComp, arqSaida);
+  } else if (metodo == 1) {
+    LZ77 lz77;
+    lz77.descomprimeArquivo(arqComp, arqSaida);
   } else if (metodo == 2) {
     // LZW - USANDO FUNÇÃO PÚBLICA descomprime(string, int)
     GameReview lzw;
-    
+
     // Lê o arquivo comprimido
     ifstream entrada(arqComp);
     if (!entrada) {
       cerr << "Erro ao abrir: " << arqComp << endl;
       return;
     }
-    
-    string comprimido((istreambuf_iterator<char>(entrada)), 
+
+    string comprimido((istreambuf_iterator<char>(entrada)),
                       istreambuf_iterator<char>());
     entrada.close();
-    
+
     // Descomprime usando a função pública
     string descomprimido = lzw.descomprime(comprimido, 2);
-    
+
     // Salva o resultado descomprimido
     ofstream saida(arqSaida);
     if (!saida) {
       cerr << "Erro ao criar: " << arqSaida << endl;
       return;
     }
-    
+
     saida << descomprimido;
     saida.close();
-    
+
     cout << "   [LZW] Descompressao concluida!" << endl;
-  } else {
-    cout << "Metodo de descompressao nao implementado." << endl;
   }
 }
 

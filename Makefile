@@ -17,21 +17,24 @@ endif
 
 all: $(TARGET)
 
-# 1. LINKAGEM: Junta main.o + GameReview.o + Huffman.o para criar o executável
-$(TARGET): main.o GameReview.o Huffman.o
-	$(CXX) $(CXXFLAGS) -o $(TARGET) main.o GameReview.o Huffman.o
+$(TARGET): main.o GameReview.o Huffman.o LZ77.o
+	$(CXX) $(CXXFLAGS) -o $(TARGET) main.o GameReview.o Huffman.o LZ77.o
 
-# 2. Compila o main (cria main.o)
+# 2. Regra para o main.o (mantenha igual)
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-# 3. Compila o GameReview (cria GameReview.o)
+# 3. Regra para o GameReview.o (mantenha igual)
 GameReview.o: GameReview.cpp GameReview.h
 	$(CXX) $(CXXFLAGS) -c GameReview.cpp
 
-# 4. Compila o Huffman que está na pasta auxiliares (cria Huffman.o)
+# 4. Regra para o Huffman.o (mantenha igual)
 Huffman.o: auxiliares/Huffman.cpp auxiliares/Huffman.h
 	$(CXX) $(CXXFLAGS) -c auxiliares/Huffman.cpp -o Huffman.o
+
+# 5. NOVA REGRA: Compilar o LZ77
+LZ77.o: auxiliares/LZ77.cpp auxiliares/LZ77.h
+	$(CXX) $(CXXFLAGS) -c auxiliares/LZ77.cpp -o LZ77.o
 
 run: all
 	$(RUN)
